@@ -46,20 +46,16 @@ export default function Register() {
     }
 
     if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
-        user_id: data.user.id,
+      // Profile will be created after email confirmation via CompleteProfile page
+      // Store profile data in localStorage so CompleteProfile can use it
+      localStorage.setItem("pending_profile", JSON.stringify({
         name: form.name,
         surnames: form.surnames,
         cycle: form.cycle,
         speciality: form.speciality,
-      });
-
-      if (profileError) {
-        toast.error("Error al crear perfil: " + profileError.message);
-      } else {
-        toast.success("¡Registro completado! Revisa tu correo para verificar la cuenta.");
-        navigate("/login");
-      }
+      }));
+      toast.success("¡Registro completado! Revisa tu correo para verificar la cuenta.");
+      navigate("/login");
     }
     setLoading(false);
   };
