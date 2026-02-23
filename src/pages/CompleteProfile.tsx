@@ -14,11 +14,20 @@ import { CICLOS_MEDIO, CICLOS_SUPERIOR } from "@/lib/constants";
 export default function CompleteProfile() {
   const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  
+  // Try to load pending profile data from registration
+  const pendingProfile = (() => {
+    try {
+      const stored = localStorage.getItem("pending_profile");
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  })();
+
   const [form, setForm] = useState({
-    name: "",
-    surnames: "",
-    cycle: "" as "" | "MEDIO" | "SUPERIOR",
-    speciality: "",
+    name: pendingProfile?.name || "",
+    surnames: pendingProfile?.surnames || "",
+    cycle: (pendingProfile?.cycle || "") as "" | "MEDIO" | "SUPERIOR",
+    speciality: pendingProfile?.speciality || "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +50,7 @@ export default function CompleteProfile() {
     if (error) {
       toast.error("Error: " + error.message);
     } else {
+      localStorage.removeItem("pending_profile");
       await refreshProfile();
       navigate("/dashboard");
     }
