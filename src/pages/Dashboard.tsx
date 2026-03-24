@@ -49,7 +49,7 @@ export default function Dashboard() {
       bgColor: "bg-primary/10",
     },
     {
-      title: "Entradas de Diario",
+      title: "Entradas de Memoria",
       value: String(stats.diary),
       progress: null,
       icon: BookOpen,

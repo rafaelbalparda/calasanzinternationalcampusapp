@@ -1,0 +1,1 @@
+ALTER TABLE public.diary_entries ADD COLUMN file_path text, ADD COLUMN file_name text;

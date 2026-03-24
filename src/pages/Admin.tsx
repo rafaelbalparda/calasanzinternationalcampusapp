@@ -65,7 +65,7 @@ export default function Admin() {
       Especialidad: s.speciality,
       "Docs Entregados": `${s.docsCount}/${DOCUMENT_TYPES.length}`,
       "Reportes Entregados": `${s.reportsCount}/12`,
-      "Entradas Diario": s.diaryCount,
+      "Entradas Memoria": s.diaryCount,
       "Progreso Docs (%)": Math.round((s.docsCount / DOCUMENT_TYPES.length) * 100),
       "Progreso Reportes (%)": Math.round((s.reportsCount / 12) * 100),
     }));
@@ -96,7 +96,7 @@ export default function Admin() {
             { label: "Alumnos", value: students.length, icon: Users, color: "text-primary bg-primary/10" },
             { label: "Docs Completos", value: students.filter((s) => s.docsCount === DOCUMENT_TYPES.length).length, icon: FileText, color: "text-success bg-success/10" },
             { label: "Reportes Completos", value: students.filter((s) => s.reportsCount === 12).length, icon: CalendarDays, color: "text-secondary bg-secondary/10" },
-            { label: "Entradas Diario", value: students.reduce((sum, s) => sum + s.diaryCount, 0), icon: BookOpen, color: "text-warning bg-warning/10" },
+            { label: "Entradas Memoria", value: students.reduce((sum, s) => sum + s.diaryCount, 0), icon: BookOpen, color: "text-warning bg-warning/10" },
           ].map((stat) => (
             <div key={stat.label} className="glass-card p-4">
               <div className={`p-2 rounded-lg w-fit ${stat.color}`}>
@@ -132,7 +132,7 @@ export default function Admin() {
                     <th className="text-left p-3 text-xs font-semibold text-muted-foreground uppercase hidden md:table-cell">Especialidad</th>
                     <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase">Docs</th>
                     <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase">Reportes</th>
-                    <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Diario</th>
+                    <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Memoria</th>
                     <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase">Progreso</th>
                   </tr>
                 </thead>
