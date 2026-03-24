@@ -19,7 +19,7 @@ const studentLinks = [
   { to: "/dashboard", label: "Panel", icon: LayoutDashboard },
   { to: "/documents", label: "Documentación", icon: FileText },
   { to: "/weekly-reports", label: "Reportes Semanales", icon: CalendarDays },
-  { to: "/diary", label: "Diario", icon: BookOpen },
+  { to: "/memoria", label: "Memoria", icon: BookOpen },
   { to: "/guide", label: "Guía Erasmus+", icon: Info },
 ];
 

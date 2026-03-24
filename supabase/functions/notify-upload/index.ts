@@ -45,8 +45,8 @@ serve(async (req) => {
       subject = `📅 Reporte semanal - ${studentName}`;
       message = `El alumno/a ${studentName} ha entregado el reporte de la semana ${body.week}${body.fileName ? `\nArchivo: ${body.fileName}` : ""}`;
     } else if (body.type === "diary") {
-      subject = `📝 Entrada de diario - ${studentName}`;
-      message = `El alumno/a ${studentName} ha añadido una entrada al diario: ${body.title}`;
+      subject = `📝 Entrada de memoria - ${studentName}`;
+      message = `El alumno/a ${studentName} ha añadido una entrada a la memoria: ${body.title}${body.fileName ? `\nArchivo adjunto: ${body.fileName}` : ""}`;
     }
 
     // Send email notification using Supabase's built-in email

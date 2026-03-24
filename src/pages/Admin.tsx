@@ -132,7 +132,7 @@ export default function Admin() {
                     <th className="text-left p-3 text-xs font-semibold text-muted-foreground uppercase hidden md:table-cell">Especialidad</th>
                     <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase">Docs</th>
                     <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase">Reportes</th>
-                    <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Diario</th>
+                    <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Memoria</th>
                     <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase">Progreso</th>
                   </tr>
                 </thead>
