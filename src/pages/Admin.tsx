@@ -65,7 +65,7 @@ export default function Admin() {
       Especialidad: s.speciality,
       "Docs Entregados": `${s.docsCount}/${DOCUMENT_TYPES.length}`,
       "Reportes Entregados": `${s.reportsCount}/12`,
-      "Entradas Diario": s.diaryCount,
+      "Entradas Memoria": s.diaryCount,
       "Progreso Docs (%)": Math.round((s.docsCount / DOCUMENT_TYPES.length) * 100),
       "Progreso Reportes (%)": Math.round((s.reportsCount / 12) * 100),
     }));
