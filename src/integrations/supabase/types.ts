@@ -19,6 +19,8 @@ export type Database = {
           content: string
           created_at: string
           entry_date: string
+          file_name: string | null
+          file_path: string | null
           id: string
           title: string
           updated_at: string
@@ -28,6 +30,8 @@ export type Database = {
           content: string
           created_at?: string
           entry_date?: string
+          file_name?: string | null
+          file_path?: string | null
           id?: string
           title: string
           updated_at?: string
@@ -37,6 +41,8 @@ export type Database = {
           content?: string
           created_at?: string
           entry_date?: string
+          file_name?: string | null
+          file_path?: string | null
           id?: string
           title?: string
           updated_at?: string
