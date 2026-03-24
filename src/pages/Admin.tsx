@@ -96,7 +96,7 @@ export default function Admin() {
             { label: "Alumnos", value: students.length, icon: Users, color: "text-primary bg-primary/10" },
             { label: "Docs Completos", value: students.filter((s) => s.docsCount === DOCUMENT_TYPES.length).length, icon: FileText, color: "text-success bg-success/10" },
             { label: "Reportes Completos", value: students.filter((s) => s.reportsCount === 12).length, icon: CalendarDays, color: "text-secondary bg-secondary/10" },
-            { label: "Entradas Diario", value: students.reduce((sum, s) => sum + s.diaryCount, 0), icon: BookOpen, color: "text-warning bg-warning/10" },
+            { label: "Entradas Memoria", value: students.reduce((sum, s) => sum + s.diaryCount, 0), icon: BookOpen, color: "text-warning bg-warning/10" },
           ].map((stat) => (
             <div key={stat.label} className="glass-card p-4">
               <div className={`p-2 rounded-lg w-fit ${stat.color}`}>
