@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-import { Download, Users, FileText, CalendarDays, BookOpen, Search, Eye, Paperclip } from "lucide-react";
+import { Download, Users, FileText, CalendarDays, BookOpen, Search, Eye, Paperclip, FolderOpen, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -32,6 +32,25 @@ interface DiaryEntry {
   file_name: string | null;
 }
 
+interface DocumentRow {
+  id: string;
+  document_type: string;
+  uploaded: boolean;
+  file_path: string | null;
+  file_name: string | null;
+  uploaded_at: string | null;
+}
+
+interface ReportRow {
+  id: string;
+  week_number: number;
+  uploaded: boolean;
+  file_path: string | null;
+  file_name: string | null;
+  report_text: string | null;
+  uploaded_at: string | null;
+}
+
 export default function Admin() {
   const [students, setStudents] = useState<StudentData[]>([]);
   const [search, setSearch] = useState("");
@@ -39,6 +58,10 @@ export default function Admin() {
   const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(null);
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [loadingEntries, setLoadingEntries] = useState(false);
+  const [docsStudent, setDocsStudent] = useState<StudentData | null>(null);
+  const [studentDocs, setStudentDocs] = useState<DocumentRow[]>([]);
+  const [studentReports, setStudentReports] = useState<ReportRow[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -80,6 +103,26 @@ export default function Admin() {
       setEntries(data || []);
     }
     setLoadingEntries(false);
+  };
+
+  const openStudentDocs = async (student: StudentData) => {
+    setDocsStudent(student);
+    setLoadingDocs(true);
+    const [{ data: docs, error: e1 }, { data: reps, error: e2 }] = await Promise.all([
+      supabase
+        .from("documents")
+        .select("id, document_type, uploaded, file_path, file_name, uploaded_at")
+        .eq("user_id", student.user_id),
+      supabase
+        .from("weekly_reports")
+        .select("id, week_number, uploaded, file_path, file_name, report_text, uploaded_at")
+        .eq("user_id", student.user_id)
+        .order("week_number", { ascending: true }),
+    ]);
+    if (e1 || e2) toast.error("Error cargando documentos");
+    setStudentDocs((docs as DocumentRow[]) || []);
+    setStudentReports((reps as ReportRow[]) || []);
+    setLoadingDocs(false);
   };
 
   const downloadAttachment = async (filePath: string, fileName: string) => {
@@ -216,15 +259,26 @@ export default function Admin() {
                           </div>
                         </td>
                         <td className="p-3 text-center">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openStudentMemoria(s)}
-                            className="gap-1"
-                          >
-                            <Eye size={14} />
-                            <span className="hidden sm:inline">Memoria</span>
-                          </Button>
+                          <div className="flex items-center justify-center gap-2 flex-wrap">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openStudentMemoria(s)}
+                              className="gap-1"
+                            >
+                              <Eye size={14} />
+                              <span className="hidden sm:inline">Memoria</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openStudentDocs(s)}
+                              className="gap-1"
+                            >
+                              <FolderOpen size={14} />
+                              <span className="hidden sm:inline">Documentos</span>
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -283,6 +337,109 @@ export default function Admin() {
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Documentos & reportes dialog */}
+        <Dialog open={!!docsStudent} onOpenChange={(open) => !open && setDocsStudent(null)}>
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                Documentos de {docsStudent?.name} {docsStudent?.surnames}
+              </DialogTitle>
+            </DialogHeader>
+            {loadingDocs ? (
+              <div className="p-8 text-center text-muted-foreground">Cargando documentos...</div>
+            ) : (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
+                    Documentos obligatorios ({studentDocs.filter(d => d.uploaded).length}/{DOCUMENT_TYPES.length})
+                  </h3>
+                  <div className="space-y-2">
+                    {DOCUMENT_TYPES.map((dt) => {
+                      const doc = studentDocs.find((d) => d.document_type === dt.key);
+                      const uploaded = doc?.uploaded && doc.file_path;
+                      return (
+                        <div key={dt.key} className="glass-card p-3 flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 min-w-0">
+                            {uploaded ? (
+                              <CheckCircle2 size={18} className="text-success shrink-0" />
+                            ) : (
+                              <XCircle size={18} className="text-muted-foreground shrink-0" />
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">{dt.label}</p>
+                              {doc?.file_name && (
+                                <p className="text-xs text-muted-foreground truncate">{doc.file_name}</p>
+                              )}
+                            </div>
+                          </div>
+                          {uploaded && doc?.file_path && doc?.file_name && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => downloadAttachment(doc.file_path!, doc.file_name!)}
+                              className="gap-1 shrink-0"
+                            >
+                              <Download size={14} />
+                              <span className="hidden sm:inline">Descargar</span>
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
+                    Reportes semanales ({studentReports.filter(r => r.uploaded).length}/12)
+                  </h3>
+                  <div className="space-y-2">
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((wk) => {
+                      const rep = studentReports.find((r) => r.week_number === wk);
+                      const uploaded = rep?.uploaded;
+                      return (
+                        <div key={wk} className="glass-card p-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 min-w-0">
+                              {uploaded ? (
+                                <CheckCircle2 size={18} className="text-success shrink-0" />
+                              ) : (
+                                <XCircle size={18} className="text-muted-foreground shrink-0" />
+                              )}
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-foreground">Semana {wk}</p>
+                                {rep?.file_name && (
+                                  <p className="text-xs text-muted-foreground truncate">{rep.file_name}</p>
+                                )}
+                              </div>
+                            </div>
+                            {rep?.file_path && rep?.file_name && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => downloadAttachment(rep.file_path!, rep.file_name!)}
+                                className="gap-1 shrink-0"
+                              >
+                                <Download size={14} />
+                                <span className="hidden sm:inline">Descargar</span>
+                              </Button>
+                            )}
+                          </div>
+                          {rep?.report_text && (
+                            <p className="text-sm text-foreground whitespace-pre-wrap mt-2 pl-6">
+                              {rep.report_text}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
           </DialogContent>
