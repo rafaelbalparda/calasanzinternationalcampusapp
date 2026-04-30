@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-import { Download, Users, FileText, CalendarDays, BookOpen, Search, Eye, Paperclip } from "lucide-react";
+import { Download, Users, FileText, CalendarDays, BookOpen, Search, Eye, Paperclip, FolderOpen, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
