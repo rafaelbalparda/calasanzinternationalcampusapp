@@ -32,6 +32,25 @@ interface DiaryEntry {
   file_name: string | null;
 }
 
+interface DocumentRow {
+  id: string;
+  document_type: string;
+  uploaded: boolean;
+  file_path: string | null;
+  file_name: string | null;
+  uploaded_at: string | null;
+}
+
+interface ReportRow {
+  id: string;
+  week_number: number;
+  uploaded: boolean;
+  file_path: string | null;
+  file_name: string | null;
+  report_text: string | null;
+  uploaded_at: string | null;
+}
+
 export default function Admin() {
   const [students, setStudents] = useState<StudentData[]>([]);
   const [search, setSearch] = useState("");
@@ -39,6 +58,10 @@ export default function Admin() {
   const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(null);
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [loadingEntries, setLoadingEntries] = useState(false);
+  const [docsStudent, setDocsStudent] = useState<StudentData | null>(null);
+  const [studentDocs, setStudentDocs] = useState<DocumentRow[]>([]);
+  const [studentReports, setStudentReports] = useState<ReportRow[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
