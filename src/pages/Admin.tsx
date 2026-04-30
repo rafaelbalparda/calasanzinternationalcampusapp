@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-import { Download, Users, FileText, CalendarDays, BookOpen, CheckCircle2, Clock, Search } from "lucide-react";
+import { Download, Users, FileText, CalendarDays, BookOpen, Search, Eye, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { DOCUMENT_TYPES } from "@/lib/constants";
 import * as XLSX from "xlsx";
@@ -22,10 +23,22 @@ interface StudentData {
   diaryCount: number;
 }
 
+interface DiaryEntry {
+  id: string;
+  title: string;
+  content: string;
+  entry_date: string;
+  file_path: string | null;
+  file_name: string | null;
+}
+
 export default function Admin() {
   const [students, setStudents] = useState<StudentData[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(null);
+  const [entries, setEntries] = useState<DiaryEntry[]>([]);
+  const [loadingEntries, setLoadingEntries] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -52,6 +65,39 @@ export default function Admin() {
     };
     fetchAll();
   }, []);
+
+  const openStudentMemoria = async (student: StudentData) => {
+    setSelectedStudent(student);
+    setLoadingEntries(true);
+    const { data, error } = await supabase
+      .from("diary_entries")
+      .select("id, title, content, entry_date, file_path, file_name")
+      .eq("user_id", student.user_id)
+      .order("entry_date", { ascending: false });
+    if (error) {
+      toast.error("Error cargando memoria");
+    } else {
+      setEntries(data || []);
+    }
+    setLoadingEntries(false);
+  };
+
+  const downloadAttachment = async (filePath: string, fileName: string) => {
+    const { data, error } = await supabase.storage
+      .from("student-files")
+      .createSignedUrl(filePath, 60);
+    if (error || !data) {
+      toast.error("No se pudo generar el enlace de descarga");
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = data.signedUrl;
+    link.download = fileName;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const filtered = students.filter((s) =>
     `${s.name} ${s.surnames} ${s.speciality}`.toLowerCase().includes(search.toLowerCase())
@@ -134,6 +180,7 @@ export default function Admin() {
                     <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase">Reportes</th>
                     <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Memoria</th>
                     <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase">Progreso</th>
+                    <th className="text-center p-3 text-xs font-semibold text-muted-foreground uppercase">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -168,6 +215,17 @@ export default function Admin() {
                             <span className="text-xs font-medium text-muted-foreground w-8">{totalProgress}%</span>
                           </div>
                         </td>
+                        <td className="p-3 text-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openStudentMemoria(s)}
+                            className="gap-1"
+                          >
+                            <Eye size={14} />
+                            <span className="hidden sm:inline">Memoria</span>
+                          </Button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -176,6 +234,59 @@ export default function Admin() {
             </div>
           </div>
         )}
+
+        {/* Memoria dialog */}
+        <Dialog open={!!selectedStudent} onOpenChange={(open) => !open && setSelectedStudent(null)}>
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                Memoria de {selectedStudent?.name} {selectedStudent?.surnames}
+              </DialogTitle>
+            </DialogHeader>
+            {loadingEntries ? (
+              <div className="p-8 text-center text-muted-foreground">Cargando entradas...</div>
+            ) : entries.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground">
+                Este alumno aún no ha creado entradas en su memoria.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {entries.map((e) => (
+                  <div key={e.id} className="glass-card p-4">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div>
+                        <h3 className="font-semibold text-foreground">{e.title}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(e.entry_date).toLocaleDateString("es-ES", {
+                            day: "numeric", month: "long", year: "numeric"
+                          })}
+                        </p>
+                      </div>
+                      {e.file_path && e.file_name && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => downloadAttachment(e.file_path!, e.file_name!)}
+                          className="gap-1 shrink-0"
+                        >
+                          <Paperclip size={14} />
+                          <Download size={14} />
+                          <span className="hidden sm:inline">Descargar</span>
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{e.content}</p>
+                    {e.file_name && (
+                      <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                        <Paperclip size={12} /> {e.file_name}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </Layout>
   );
