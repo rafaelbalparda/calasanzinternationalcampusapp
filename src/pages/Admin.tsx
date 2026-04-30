@@ -105,6 +105,26 @@ export default function Admin() {
     setLoadingEntries(false);
   };
 
+  const openStudentDocs = async (student: StudentData) => {
+    setDocsStudent(student);
+    setLoadingDocs(true);
+    const [{ data: docs, error: e1 }, { data: reps, error: e2 }] = await Promise.all([
+      supabase
+        .from("documents")
+        .select("id, document_type, uploaded, file_path, file_name, uploaded_at")
+        .eq("user_id", student.user_id),
+      supabase
+        .from("weekly_reports")
+        .select("id, week_number, uploaded, file_path, file_name, report_text, uploaded_at")
+        .eq("user_id", student.user_id)
+        .order("week_number", { ascending: true }),
+    ]);
+    if (e1 || e2) toast.error("Error cargando documentos");
+    setStudentDocs((docs as DocumentRow[]) || []);
+    setStudentReports((reps as ReportRow[]) || []);
+    setLoadingDocs(false);
+  };
+
   const downloadAttachment = async (filePath: string, fileName: string) => {
     const { data, error } = await supabase.storage
       .from("student-files")
