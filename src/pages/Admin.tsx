@@ -259,15 +259,26 @@ export default function Admin() {
                           </div>
                         </td>
                         <td className="p-3 text-center">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openStudentMemoria(s)}
-                            className="gap-1"
-                          >
-                            <Eye size={14} />
-                            <span className="hidden sm:inline">Memoria</span>
-                          </Button>
+                          <div className="flex items-center justify-center gap-2 flex-wrap">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openStudentMemoria(s)}
+                              className="gap-1"
+                            >
+                              <Eye size={14} />
+                              <span className="hidden sm:inline">Memoria</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openStudentDocs(s)}
+                              className="gap-1"
+                            >
+                              <FolderOpen size={14} />
+                              <span className="hidden sm:inline">Documentos</span>
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );
