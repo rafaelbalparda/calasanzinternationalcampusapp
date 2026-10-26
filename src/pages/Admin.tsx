@@ -126,20 +126,21 @@ export default function Admin() {
   };
 
   const downloadAttachment = async (filePath: string, fileName: string) => {
-    const { data, error } = await supabase.storage
-      .from("student-files")
-      .createSignedUrl(filePath, 60);
+    const toastId = toast.loading("Descargando...");
+    const { data, error } = await supabase.storage.from("student-files").download(filePath);
     if (error || !data) {
-      toast.error("No se pudo generar el enlace de descarga");
+      toast.error("No se pudo descargar el archivo", { id: toastId });
       return;
     }
+    const url = URL.createObjectURL(data);
     const link = document.createElement("a");
-    link.href = data.signedUrl;
+    link.href = url;
     link.download = fileName;
-    link.target = "_blank";
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    toast.success("Archivo descargado", { id: toastId });
   };
 
   const filtered = students.filter((s) =>
