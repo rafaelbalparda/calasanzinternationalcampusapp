@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,8 +12,11 @@ import { motion } from "framer-motion";
 import { CICLOS_MEDIO, CICLOS_SUPERIOR } from "@/lib/constants";
 
 export default function CompleteProfile() {
-  const { user, refreshProfile } = useAuth();
+  const { user, refreshProfile, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  useEffect(() => {
+    if (!authLoading && isAdmin) navigate("/admin", { replace: true });
+  }, [authLoading, isAdmin, navigate]);
   
   // Try to load pending profile data from registration
   const pendingProfile = (() => {
